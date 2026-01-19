@@ -10,14 +10,23 @@ export interface Transaction {
   type: TransactionType;
 }
 
+export interface Category {
+  id: string;
+  label: string;
+  color: string;
+  icon?: string;
+  budget?: number; // Orçamento mensal para esta categoria
+}
+
+export interface AppSettings {
+  userName: string;
+  currency: 'BRL' | 'USD' | 'EUR';
+  language: 'pt-BR' | 'en-US';
+}
+
 export interface SummaryData {
   totalIncome: number;
   totalExpense: number;
   balance: number;
+  budgetUsage: number; // Porcentagem do orçamento total usado
 }
-
-export type Category = {
-  id: string;
-  label: string;
-  color: string;
-};
