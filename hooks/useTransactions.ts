@@ -51,6 +51,10 @@ export const useTransactions = () => {
     setCategories(prev => prev.map(c => c.id === id ? { ...c, budget } : c));
   }, []);
 
+  const updateSettings = useCallback((newSettings: Partial<AppSettings>) => {
+    setSettings(prev => ({ ...prev, ...newSettings }));
+  }, []);
+
   const addCategory = useCallback((label: string, color: string, budget?: number) => {
     setCategories(prev => [...prev, { id: crypto.randomUUID(), label, color, budget }]);
   }, []);
@@ -84,7 +88,7 @@ export const useTransactions = () => {
     deleteTransaction,
     updateCategoryBudget,
     addCategory,
-    setSettings,
+    updateSettings,
     clearAll: () => setTransactions([])
   };
 };

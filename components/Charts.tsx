@@ -1,6 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts';
+import { PieChart as PieChartIcon, BarChart3 as BarChartIcon } from 'lucide-react';
 import { Transaction } from '../types';
 import { CATEGORIES } from '../constants';
 
@@ -43,8 +44,8 @@ const Charts: React.FC<ChartsProps> = ({ transactions }) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 mb-8">
       {/* Expenses by Category */}
-      <div className="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-slate-100 h-[380px] md:h-[400px]">
-        <h3 className="text-slate-800 font-bold mb-4 flex items-center gap-2">
+      <div className="bg-white p-5 md:p-6 rounded-[2rem] shadow-sm border border-slate-100 h-[380px] md:h-[400px]">
+        <h3 className="text-slate-800 font-black mb-4 flex items-center gap-2">
           <span className="w-1.5 h-4 bg-indigo-500 rounded-full"></span>
           Gastos por Categoria
         </h3>
@@ -64,7 +65,7 @@ const Charts: React.FC<ChartsProps> = ({ transactions }) => {
                 ))}
               </Pie>
               <Tooltip 
-                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                 formatter={(value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)}
               />
               <Legend verticalAlign="bottom" height={36}/>
@@ -73,7 +74,7 @@ const Charts: React.FC<ChartsProps> = ({ transactions }) => {
         ) : (
           <div className="h-[80%] flex flex-col items-center justify-center text-slate-400 gap-2">
             <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center">
-              <PieChart size={20} className="text-slate-300" />
+              <PieChartIcon size={20} className="text-slate-300" />
             </div>
             <p className="text-sm font-medium">Sem dados de despesas</p>
           </div>
@@ -81,8 +82,8 @@ const Charts: React.FC<ChartsProps> = ({ transactions }) => {
       </div>
 
       {/* Income vs Expense Comparison */}
-      <div className="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-slate-100 h-[380px] md:h-[400px]">
-        <h3 className="text-slate-800 font-bold mb-4 flex items-center gap-2">
+      <div className="bg-white p-5 md:p-6 rounded-[2rem] shadow-sm border border-slate-100 h-[380px] md:h-[400px]">
+        <h3 className="text-slate-800 font-black mb-4 flex items-center gap-2">
           <span className="w-1.5 h-4 bg-emerald-500 rounded-full"></span>
           Receitas vs Despesas
         </h3>
@@ -90,21 +91,21 @@ const Charts: React.FC<ChartsProps> = ({ transactions }) => {
           <ResponsiveContainer width="100%" height="85%">
             <BarChart data={comparisonData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <XAxis dataKey="name" hide />
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8' }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 600 }} />
               <Tooltip 
                 cursor={{ fill: '#f8fafc' }} 
-                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                 formatter={(value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)}
               />
               <Legend verticalAlign="bottom" height={36}/>
-              <Bar dataKey="Receitas" fill="#10b981" radius={[6, 6, 0, 0]} animationDuration={1000} />
-              <Bar dataKey="Despesas" fill="#ef4444" radius={[6, 6, 0, 0]} animationDuration={1200} />
+              <Bar dataKey="Receitas" fill="#10b981" radius={[8, 8, 0, 0]} animationDuration={1000} />
+              <Bar dataKey="Despesas" fill="#ef4444" radius={[8, 8, 0, 0]} animationDuration={1200} />
             </BarChart>
           </ResponsiveContainer>
         ) : (
           <div className="h-[80%] flex flex-col items-center justify-center text-slate-400 gap-2">
             <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center">
-              <BarChart size={20} className="text-slate-300" />
+              <BarChartIcon size={20} className="text-slate-300" />
             </div>
             <p className="text-sm font-medium">Aguardando movimentações</p>
           </div>

@@ -3,7 +3,8 @@ import React, { useState, useMemo } from 'react';
 import { 
   Plus, LayoutDashboard, History, Settings, TrendingUp, 
   Menu, X, Trash2, PieChart as PieIcon, Download, 
-  ArrowUpRight, ArrowDownLeft, Wallet, Bell, Search as SearchIcon
+  ArrowUpRight, ArrowDownLeft, Wallet, Bell, Search as SearchIcon,
+  User, CheckCircle2
 } from 'lucide-react';
 import SummaryCards from './components/SummaryCards';
 import TransactionTable from './components/TransactionTable';
@@ -16,12 +17,13 @@ import { useTransactions } from './hooks/useTransactions';
 const App: React.FC = () => {
   const { 
     transactions, categories, settings, summary, 
-    addTransaction, deleteTransaction, updateCategoryBudget, clearAll 
+    addTransaction, deleteTransaction, updateCategoryBudget, clearAll, updateSettings 
   } = useTransactions();
   
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'transactions' | 'settings'>('dashboard');
+  const [showSavedToast, setShowSavedToast] = useState(false);
   
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -42,6 +44,21 @@ const App: React.FC = () => {
       return matchesSearch && matchesCategory && matchesType && matchesMonth;
     });
   }, [transactions, search, categoryFilter, typeFilter, monthFilter]);
+
+  const exportData = () => {
+    const dataStr = JSON.stringify({ transactions, categories, settings });
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', 'fintrack-backup.json');
+    linkElement.click();
+  };
+
+  const handleUpdateName = (newName: string) => {
+    updateSettings({ userName: newName });
+    setShowSavedToast(true);
+    setTimeout(() => setShowSavedToast(false), 3000);
+  };
 
   return (
     <div className="min-h-screen bg-[#F1F5F9] flex flex-col lg:flex-row font-['Inter']">
@@ -81,7 +98,7 @@ const App: React.FC = () => {
 
         <div className="mt-auto pt-6 border-t border-slate-800">
           <div className="bg-slate-800/40 p-5 rounded-3xl flex items-center gap-4 border border-slate-700/30">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center font-black text-white text-lg shadow-inner">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center font-black text-white text-lg shadow-inner uppercase">
               {settings.userName.split(' ').map(n => n[0]).join('')}
             </div>
             <div className="overflow-hidden">
@@ -98,6 +115,14 @@ const App: React.FC = () => {
       {/* Main Content */}
       <main className="flex-1 flex flex-col relative pb-32 lg:pb-8 h-screen overflow-y-auto">
         
+        {/* Toast Notificação */}
+        {showSavedToast && (
+          <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] bg-emerald-600 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
+            <CheckCircle2 size={20} />
+            <span className="font-bold text-sm tracking-tight">Preferências salvas com sucesso!</span>
+          </div>
+        )}
+
         {/* Header Superior - Glassmorphism */}
         <header className="sticky top-0 z-30 px-6 py-4 lg:py-6 bg-[#F1F5F9]/80 backdrop-blur-xl flex items-center justify-between">
           <div className="lg:hidden flex items-center gap-2">
@@ -109,7 +134,13 @@ const App: React.FC = () => {
 
           <div className="hidden lg:flex items-center gap-2 text-slate-500 font-medium bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 transition-all w-96">
             <SearchIcon size={18} />
-            <input type="text" placeholder="Pesquisar..." className="bg-transparent outline-none flex-1 text-sm" />
+            <input 
+              type="text" 
+              placeholder="Pesquisar..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="bg-transparent outline-none flex-1 text-sm" 
+            />
           </div>
 
           <div className="flex items-center gap-3">
@@ -130,11 +161,11 @@ const App: React.FC = () => {
           
           <div className="mb-10">
             <h1 className="text-3xl lg:text-5xl font-black text-slate-900 tracking-tighter leading-none mb-2">
-              Painel Geral
+              {activeTab === 'dashboard' ? 'Painel Geral' : activeTab === 'transactions' ? 'Minhas Finanças' : 'Configurações'}
             </h1>
             <div className="flex items-center gap-2 text-slate-500 font-medium">
               <span className="w-8 h-1 bg-indigo-500 rounded-full"></span>
-              Bem-vindo de volta, {settings.userName.split(' ')[0]}
+              Olá, {settings.userName.split(' ')[0]}
             </div>
           </div>
 
@@ -151,7 +182,7 @@ const App: React.FC = () => {
                 <div className="xl:col-span-2 space-y-8">
                   <Charts transactions={filteredTransactions} />
                   <div className="bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-sm">
-                    <div className="flex justify-between items-center mb-6">
+                    <div className="flex justify-between items-center mb-6 px-4">
                       <h3 className="text-xl font-black text-slate-800">Transações Recentes</h3>
                       <button onClick={() => setActiveTab('transactions')} className="text-sm font-bold text-indigo-600 hover:underline">Ver todas</button>
                     </div>
@@ -164,12 +195,16 @@ const App: React.FC = () => {
                     <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform duration-700">
                       <TrendingUp size={160} />
                     </div>
-                    <h4 className="text-xl font-black mb-2">Dica do FinTrack</h4>
+                    <h4 className="text-xl font-black mb-2">Insight Inteligente</h4>
                     <p className="text-indigo-100 text-sm leading-relaxed mb-6">
-                      Você economizou <span className="font-black text-white">12% a mais</span> que no mês passado. Continue assim para bater sua meta!
+                      Seu saldo está <span className="font-black text-white">{summary.balance >= 0 ? 'positivo' : 'negativo'}</span>. 
+                      {summary.balance >= 0 ? ' Considere investir o excedente!' : ' Tente reduzir gastos em lazer.'}
                     </p>
-                    <button className="w-full bg-white text-indigo-600 py-3 rounded-2xl font-black text-sm hover:bg-indigo-50 transition-colors">
-                      Ver Análise Completa
+                    <button 
+                      onClick={exportData}
+                      className="w-full bg-white text-indigo-600 py-3 rounded-2xl font-black text-sm hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Download size={16} /> Exportar Relatório
                     </button>
                   </div>
                 </div>
@@ -195,24 +230,44 @@ const App: React.FC = () => {
           )}
 
           {activeTab === 'settings' && (
-            <div className="animate-in fade-in slide-in-from-bottom-6 duration-700 bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm max-w-2xl mx-auto">
-               <h2 className="text-2xl font-black text-slate-900 mb-8">Preferências</h2>
-               <div className="space-y-6">
-                 <div>
-                   <label className="block text-sm font-black text-slate-500 uppercase tracking-widest mb-2">Seu Nome</label>
-                   <input 
-                    type="text" 
-                    value={settings.userName} 
-                    onChange={(e) => clearAll()} // Exemplo, aqui você atualizaria o estado
-                    className="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-bold"
-                   />
+            <div className="animate-in fade-in slide-in-from-bottom-6 duration-700 space-y-8 max-w-2xl mx-auto">
+               <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
+                 <div className="flex items-center gap-3 mb-8">
+                    <div className="p-3 bg-indigo-100 text-indigo-600 rounded-2xl">
+                      <User size={24} />
+                    </div>
+                    <h2 className="text-2xl font-black text-slate-900">Seu Perfil</h2>
                  </div>
-                 <button 
-                  onClick={clearAll}
-                  className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl bg-rose-50 text-rose-600 font-bold hover:bg-rose-100 transition-colors"
-                 >
-                   <Trash2 size={20} /> Apagar Todos os Dados
-                 </button>
+                 <div className="space-y-6">
+                   <div>
+                     <label className="block text-sm font-black text-slate-500 uppercase tracking-widest mb-2">Nome de Usuário</label>
+                     <input 
+                      type="text" 
+                      defaultValue={settings.userName} 
+                      onBlur={(e) => handleUpdateName(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-bold text-slate-700"
+                     />
+                     <p className="text-[10px] text-slate-400 mt-2 font-bold italic">O nome será atualizado automaticamente ao sair do campo.</p>
+                   </div>
+                   
+                   <div className="pt-6 border-t border-slate-100">
+                      <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-4">Gerenciamento de Dados</h3>
+                      <div className="flex flex-col gap-3">
+                        <button 
+                          onClick={exportData}
+                          className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl bg-indigo-50 text-indigo-600 font-bold hover:bg-indigo-100 transition-colors"
+                        >
+                          <Download size={20} /> Fazer Backup (JSON)
+                        </button>
+                        <button 
+                          onClick={() => { if(confirm('Tem certeza?')) clearAll() }}
+                          className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl bg-rose-50 text-rose-600 font-bold hover:bg-rose-100 transition-colors"
+                        >
+                          <Trash2 size={20} /> Apagar Todos os Dados
+                        </button>
+                      </div>
+                   </div>
+                 </div>
                </div>
             </div>
           )}
@@ -240,10 +295,6 @@ const App: React.FC = () => {
           className="bg-indigo-600 text-white p-4 rounded-2xl -mt-10 shadow-xl shadow-indigo-600/40 active:scale-90 transition-transform"
         >
           <Plus size={28} />
-        </button>
-        <button className="flex flex-col items-center gap-1 text-slate-400">
-          <PieIcon size={24} />
-          <span className="text-[10px] font-black uppercase">Metas</span>
         </button>
         <button 
           onClick={() => setActiveTab('settings')}
